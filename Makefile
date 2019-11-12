@@ -1,7 +1,7 @@
 # Makefile for CANopenNode, basic compile with no CAN device.
 
 
-STACKDRV_SRC =  stack/drvTemplate
+STACKDRV_SRC =  stack/socketCAN
 STACK_SRC =     stack
 CANOPEN_SRC =   .
 APPL_SRC =      example
@@ -17,7 +17,8 @@ INCLUDE_DIRS = -I$(STACKDRV_SRC) \
 
 
 SOURCES =       $(STACKDRV_SRC)/CO_driver.c     \
-                $(STACKDRV_SRC)/eeprom.c        \
+                $(STACKDRV_SRC)/CO_Linux_tasks.c\
+                $(STACKDRV_SRC)/CO_OD_storage.c\
                 $(STACK_SRC)/crc16-ccitt.c      \
                 $(STACK_SRC)/CO_SDO.c           \
                 $(STACK_SRC)/CO_Emergency.c     \
@@ -30,8 +31,7 @@ SOURCES =       $(STACKDRV_SRC)/CO_driver.c     \
                 $(STACK_SRC)/CO_LSSslave.c      \
                 $(STACK_SRC)/CO_trace.c         \
                 $(CANOPEN_SRC)/CANopen.c        \
-                $(APPL_SRC)/CO_OD.c             \
-                $(APPL_SRC)/main.c
+                $(APPL_SRC)/CO_OD.c
 
 
 OBJS = $(SOURCES:%.c=%.o)
@@ -48,7 +48,8 @@ clean:
 	rm -f $(OBJS) $(LINK_TARGET)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c -fPIC $< -o $@
 
 $(LINK_TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) -shared $^ -o canopen.so
+	# $(CC) $(LDFLAGS) -c -fPIC $^ -o $@
